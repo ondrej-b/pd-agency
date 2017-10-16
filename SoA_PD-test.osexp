@@ -1,0 +1,287 @@
+---
+API: 2
+OpenSesame: 3.1.6
+Platform: nt
+---
+set width 1024
+set uniform_coordinates yes
+set title "SoA - PD test"
+set subject_parity even
+set subject_nr 0
+set start experiment
+set sound_sample_size -16
+set sound_freq 48000
+set sound_channels 2
+set sound_buf_size 1024
+set sampler_backend legacy
+set round_decimals 2
+set mouse_backend legacy
+set keyboard_backend legacy
+set height 768
+set fullscreen no
+set form_clicks no
+set foreground black
+set font_underline no
+set font_size 18
+set font_italic no
+set font_family mono
+set font_bold no
+set experiment_path "G:\\SOA_PD_pilotIII\\04"
+set disable_garbage_collection yes
+set description "The main experiment item"
+set coordinates uniform
+set compensation 0
+set color_backend legacy
+set clock_backend legacy
+set canvas_backend legacy
+set bidi no
+set background white
+
+define advanced_delay cue_delay
+	set jitter_mode Uniform
+	set jitter 3000
+	set duration 2000
+	set description "Waits for a specified duration"
+
+define pygaze_log cue_pygaze_log
+	set throttle 2
+	set msg "cue-play"
+	set description "Writes information to the eye-tracker logfile"
+	set auto_log no
+
+define sequence cued_block__sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run reset_feedback always
+	run cued_pygaze_start_recording always
+	run cued_trial_loop always
+	run cued_pygaze_stop_recording always
+	run cued_block_feedback always
+
+define feedback cued_block_feedback
+	set reset_variables yes
+	set duration keypress
+	set description "Provides feedback to the participant"
+	draw textline center=1 color=black font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Konec bloku,<br /><br />Průměrný reakční čas byl [avg_rt] ms<br /><br />Pokračujte libovolnou klávesou" x=0 y=0 z_index=0
+
+define loop cued_block_loop
+	set source_file ""
+	set source table
+	set repeat 2
+	set order random
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 empty_column ""
+	run cued_block__sequence
+
+define pygaze_log cued_pygaze_log
+	set throttle 2
+	set msg "keypress-cued"
+	set description "Writes information to the eye-tracker logfile"
+	set auto_log no
+
+define logger cued_pygaze_logger
+	set description "Logs experimental data"
+	set auto_log yes
+
+define pygaze_start_recording cued_pygaze_start_recording
+	set status_msg start_trial
+	set description "Puts the eye tracker into recording mode"
+
+define pygaze_stop_recording cued_pygaze_stop_recording
+	set status_msg stop_cued_trial
+	set description "Stops recording of eye tracking data"
+
+define loop cued_trial_loop
+	set source_file ""
+	set source table
+	set repeat 10
+	set order random
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 empty_column ""
+	run cued_trial_sequence
+
+define sequence cued_trial_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run fixdot always
+	run cue_delay always
+	run synth always
+	run cue_pygaze_log always
+	run mouse_response always
+	run cued_pygaze_log always
+	run cued_pygaze_logger always
+
+define sequence experiment
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run getting_started always
+	run form_instructions always
+	run new_pygaze_init always
+	run instrukce_vol always
+	run voluntary_loop always
+	run konec_vol always
+	run instrukce_cued always
+	run cued_block_loop always
+	run konec_cued always
+
+define sketchpad fixdot
+	set duration 1
+	set description "Displays stimuli"
+	draw rect color="#6c6c6c" fill=1 h=768 penwidth=1 show_if=always w=1024 x=-512 y=-384 z_index=0
+	draw fixdot color="#000000" show_if=always style=default x=0 y=0 z_index=0
+
+define form_text_display form_instructions
+	set timeout infinite
+	set spacing 10
+	set rows "1;4;1"
+	set only_render no
+	set ok_text Rozumím
+	set margins "50;50;50;50"
+	set form_title "<span size=24>Vítejte na experimentu Pupilární agent</span>"
+	__form_text__
+	
+	Nejprve vás čeká kalibrace.
+	
+	Poté absolvujete dva bloky experimentální úlohy. 
+	
+	V první části budete mačkat tlačítko myši dle svého svobodného rozhodnutí. 
+	Ve druhé části budete reagovat stiskem tlačítka myši na zvukový signál, co nejrychleji.
+	__end__
+	set cols "1;1;1"
+	set _theme gray
+	widget 0 0 3 1 label text="[form_title]"
+	widget 0 1 3 1 label center=no text="[form_text]"
+	widget 1 2 1 1 button text="[ok_text]"
+
+
+define notepad getting_started
+	__note__
+	verze 1.4
+	
+	Čeká Vás [=len(voluntary_loop)] bloků po[=var.count_voluntary_trial_sequence+1] pokusných trialech.
+	
+	
+	Čeká Vás [=var.count_cued_block_sequence+1] bloků po[=var.count_cued_trial_sequence+1] pokusných trialech.
+	__end__
+	set description "A simple notepad to document your experiment. This plug-in does nothing."
+
+define sketchpad instrukce_cued
+	set duration keypress
+	set description "Displays stimuli"
+	draw textline center=1 color=black font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="<h2>Reakce na signál</h2><br /><br />V následující části je Vaším úkolem<br />mačkat tlačítko myši co nejdříve po zaznění tónu.<br /><br />Pokračujte libovolnou klávesou.<br />" x=0 y=0 z_index=0
+
+define sketchpad instrukce_vol
+	set duration keypress
+	set description "Displays stimuli"
+	draw textline center=1 color=black font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="<h2>Volní podmínka</h2><br /><br />Vaším úkolem nyní bude mačkat tlačítko myši<br />v libovolný okamžik dle vlastního rozhodnutí,<br />každých cca 1-8 vteřin, pokud možno nepravidelně." x=32 y=0 z_index=0
+	draw textline center=1 color=black font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Pokračujte stiskem libovolné klávesy" x=0 y=288 z_index=0
+
+define sketchpad konec_cued
+	set duration keypress
+	set description "Displays stimuli"
+	draw textline center=1 color=black font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="<h2>To je vše!</h2><br /><br />Děkujeme za Vaši účast.<br /><br />Pokračujte libovolnou klávesou.<br />" x=0 y=0 z_index=0
+
+define sketchpad konec_vol
+	set duration keypress
+	set description "Displays stimuli"
+	draw textline center=1 color=black font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Úspěšně jste absolvovali první polovinu experimentu.<br /><br />Pokračujte libovolnou klávesou" x=0 y=0 z_index=0
+
+define mouse_response mouse_response
+	set timeout infinite
+	set show_cursor no
+	set flush yes
+	set duration mouseclick
+	set description "Collects mouse responses"
+
+define pygaze_init new_pygaze_init
+	set tracker_type EyeLink
+	set smi_send_port 4444
+	set smi_recv_port 5555
+	set smi_ip "127.0.0.1"
+	set sacc_vel_thr 35
+	set sacc_acc_thr 9500
+	set eyelink_pupil_size_mode diameter
+	set eyelink_force_drift_correct yes
+	set description "Initialize and calibrate eye tracker"
+	set calibrate yes
+	set calbeep yes
+	set _logfile automatic
+
+define reset_feedback reset_feedback
+	set description "Resets the feedback variables, such as 'avg_rt' and 'acc'"
+
+define synth synth
+	set volume 1
+	set pan 0
+	set osc sine
+	set length 100
+	set freq 440
+	set duration sound
+	set description "A basic sound synthesizer"
+	set decay 5
+	set attack 0
+
+define pygaze_log vol_pygaze_log
+	set throttle 2
+	set msg "keypress-vol"
+	set description "Writes information to the eye-tracker logfile"
+	set auto_log no
+
+define pygaze_start_recording vol_pygaze_start_recording
+	set status_msg start_trial
+	set description "Puts the eye tracker into recording mode"
+
+define pygaze_stop_recording vol_pygaze_stop_recording
+	set status_msg stop_vol_trial
+	set description "Stops recording of eye tracking data"
+
+define sequence vol_trial_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run fixdot always
+	run mouse_response always
+	run vol_pygaze_log always
+	run synth always
+
+define sequence voluntary_block_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run reset_feedback always
+	run vol_pygaze_start_recording always
+	run voluntary_trial_loop always
+	run vol_pygaze_stop_recording always
+
+define loop voluntary_loop
+	set source_file ""
+	set source table
+	set repeat 2
+	set order random
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 empty_column ""
+	run voluntary_block_sequence
+
+define loop voluntary_trial_loop
+	set source_file ""
+	set source table
+	set repeat 10
+	set order random
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 empty_column ""
+	run vol_trial_sequence
+
